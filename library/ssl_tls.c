@@ -4370,7 +4370,11 @@ static int ssl_conf_set_psk_identity( mbedtls_ssl_config *conf,
         return( MBEDTLS_ERR_SSL_BAD_INPUT_DATA );
     }
 
-    conf->psk_identity = mbedtls_calloc( 1, psk_identity_len );
+    /* The PSK Identity can be length zero, so we use whether psk_identity is
+     * NULL or not to indicate whether the identity has been configured or not.
+     * However, we can't be sure to allocate zero bytes on all systems, so we
+     * add one to ensure an allocation is always made. */
+    conf->psk_identity = mbedtls_calloc( 1, (psk_identity_len + 1) );
     if( conf->psk_identity == NULL )
         return( MBEDTLS_ERR_SSL_ALLOC_FAILED );
 
