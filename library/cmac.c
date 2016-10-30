@@ -105,7 +105,7 @@ static int cmac_multiply_by_u( unsigned char *output,
         return( MBEDTLS_ERR_CIPHER_BAD_INPUT_DATA );
     }
 
-    for( i = blocksize - 1; i >= 0; i-- )
+    for( i = (int)blocksize - 1; i >= 0; i-- )
     {
         output[i] = input[i] << 1 | overflow;
         overflow = input[i] >> 7;
@@ -209,7 +209,7 @@ int mbedtls_cipher_cmac_starts( mbedtls_cipher_context_t *ctx,
     if( ctx == NULL || ctx->cipher_info == NULL || key == NULL )
         return( MBEDTLS_ERR_CIPHER_BAD_INPUT_DATA );
 
-    if( ( retval = mbedtls_cipher_setkey( ctx, key, keybits,
+    if( ( retval = mbedtls_cipher_setkey( ctx, key, (int)keybits,
                                           MBEDTLS_ENCRYPT ) ) != 0 )
         return( retval );
 
@@ -278,7 +278,7 @@ int mbedtls_cipher_cmac_update( mbedtls_cipher_context_t *ctx,
     }
 
     /* n is the number of blocks including any final partial block */
-    n = ( ilen + block_size - 1 ) / block_size;
+    n = (int)( ( ilen + block_size - 1 ) / block_size );
 
    /* Iterate across the input data in block sized chunks */
     for( j = 0; j < n - 1; j++ )
