@@ -109,7 +109,7 @@ void ecjpake_selftest()
 void read_round_one( int role, char *data, int ref_ret )
 {
     mbedtls_ecjpake_context ctx;
-    const unsigned char pw[] = {};
+    const unsigned char pw[] = "";
     unsigned char *msg;
     size_t len;
 
@@ -133,7 +133,7 @@ exit:
 void read_round_two_cli( char *data, int ref_ret )
 {
     mbedtls_ecjpake_context ctx;
-    const unsigned char pw[] = {};
+    const unsigned char pw[] = "";
     unsigned char *msg;
     size_t len;
 
@@ -163,7 +163,7 @@ exit:
 void read_round_two_srv( char *data, int ref_ret )
 {
     mbedtls_ecjpake_context ctx;
-    const unsigned char pw[] = {};
+    const unsigned char pw[] = "";
     unsigned char *msg;
     size_t len;
 
