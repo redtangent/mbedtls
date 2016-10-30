@@ -27,13 +27,32 @@ use open qw(:std utf8);
 use constant FALSE => 0;
 use constant TRUE => 1;
 
-my $verbose;
-my $switch = shift;
-if ( defined($switch) && ( $switch eq "-v" || $switch eq "--verbose" ) ) {
-    $verbose = TRUE;
+my ($verbose, $suite_dir, $arg);
+
+while ($arg = shift) {
+
+    # Check if the argument is an option
+    if ( defined($arg) && ( $arg eq "-v" || $arg eq "--verbose" ) ) {
+        $verbose = TRUE;
+    }
+    else
+    {
+        # ...else assume it's the test suite directory
+	if( defined($suite_dir)) {
+	    die "Too many parameters";
+	}
+	else {
+            $suite_dir = $arg;
+	}
+    }
 }
 
-my @suites = grep { ! /\.(?:c|gcno|gcda|dSYM)$/ } glob 'test_suite_*';
+# If a test suite directory was given, use it
+defined( $suite_dir ) and chdir( $suite_dir );
+
+my $search_pattern = 'test_suite_*' . ($^O eq "MSWin32" ? '.exe' : '');
+
+my @suites = grep { ! /\.(?:c|gcno|gcda|dSYM)$/ } glob $search_pattern;
 die "$0: no test suite found\n" unless @suites;
 
 # in case test suites are linked dynamically
