@@ -11,7 +11,7 @@
 # Executes all the available test suites, and provides a basic summary of the
 # results.
 #
-# Usage: run-test-suites.pl [-v]
+# Usage: run-test-suites.pl [-v] [<test suite directory> <test data directory>]
 #
 # Options :
 #   -v|--verbose    - Provide a pass/fail/skip breakdown per test suite and
@@ -27,7 +27,9 @@ use open qw(:std utf8);
 use constant FALSE => 0;
 use constant TRUE => 1;
 
-my ($verbose, $suite_dir, $arg);
+my $windows = ($^O eq "MSWin32") || ($^O eq "msys");
+
+my ($verbose, $suite_dir, $data_dir, $arg);
 
 while ($arg = shift) {
 
@@ -38,11 +40,16 @@ while ($arg = shift) {
     else
     {
         # ...else assume it's the test suite directory
-	if( defined($suite_dir)) {
+	if( defined($suite_dir) ) {
 	    die "Too many parameters";
 	}
 	else {
             $suite_dir = $arg;
+	}
+
+	$arg = shift;
+	if( defined($arg) ) {
+	    $data_dir = $arg;
 	}
     }
 }
@@ -50,7 +57,9 @@ while ($arg = shift) {
 # If a test suite directory was given, use it
 defined( $suite_dir ) and chdir( $suite_dir );
 
-my $search_pattern = 'test_suite_*' . ($^O eq "MSWin32" ? '.exe' : '');
+$data_dir = defined($data_dir) ? " -d $data_dir" : " -d data_files ";
+
+my $search_pattern = 'test_suite_*' . ($windows ? '.exe' : '');
 
 my @suites = grep { ! /\.(?:c|gcno|gcda|dSYM)$/ } glob $search_pattern;
 die "$0: no test suite found\n" unless @suites;
@@ -67,7 +76,7 @@ my ($failed_suites, $total_tests_run, $failed, $suite_cases_passed,
 for my $suite (@suites)
 {
     print "$suite ", "." x ( 72 - length($suite) - 2 - 4 ), " ";
-    my $result = `$prefix$suite`;
+    my $result = `$prefix$suite $data_dir`;
 
     $suite_cases_passed = () = $result =~ /.. PASS/g;
     $suite_cases_failed = () = $result =~ /.. FAILED/g;
