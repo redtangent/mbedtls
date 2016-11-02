@@ -131,7 +131,9 @@ DISPATCH_FUNCTION
     "                           %s\n\n" \
     "   Options:\n" \
     "     -v | --verbose    Display full information about each test\n" \
-    "     -h | --help       Display this information\n\n", \
+    "     -h | --help       Display this information\n" \
+    "     -d | --data <dir> Test data directory\n" \
+    "\n", \
     argv[0], \
     "TESTCASE_FILENAME"
 
@@ -247,6 +249,7 @@ int main(int argc, const char *argv[])
 {
     /* Local Configurations and options */
     const char *default_filename = "TESTCASE_FILENAME";
+    const char *test_data_directory;
     const char *test_filename = NULL;
     const char **test_files = NULL;
     int testfile_count = 0;
@@ -294,7 +297,33 @@ int main(int argc, const char *argv[])
     {
         next_arg = argv[ arg_index ];
 
-        if( strcmp(next_arg, "--verbose" ) == 0 ||
+        if( strcmp(next_arg, "--data" ) == 0 || strcmp(next_arg, "-d" ) == 0 )
+        {
+            if( arg_index < argc )
+            {
+                arg_index++;
+            }
+            else
+            {
+                mbedtls_fprintf( stdout, USAGE );
+                mbedtls_exit( EXIT_SUCCESS );
+            }
+
+            test_data_directory = argv[ arg_index ];
+
+            /*
+             * Change the current directory to the parent of the test data
+             * directory.
+             *
+             * Note, the test cases are hardwired to look for a test data
+             * directory of 'data_files', so the current directory needs to be
+             * the parent of the given test directory, and that test directory
+             * *must* be called 'data_files'.
+             */
+            chdir(test_data_directory);
+            chdir("..");
+        }
+	else if( strcmp(next_arg, "--verbose" ) == 0 ||
                  strcmp(next_arg, "-v" ) == 0 )
         {
             option_verbose = 1;
