@@ -61,6 +61,11 @@ typedef struct _mbedtls_threading_mutex_t
     char is_valid;
 } mbedtls_threading_mutex_t;
 
+/*
+ * With phtreads we can statically initialize mutexes
+ */
+#define MBEDTLS_MUTEX_INITIALIZER { PTHREAD_MUTEX_INITIALIZER, 1 }
+
 #else
 
 /* For no given implementation, define as an opaque pointer */

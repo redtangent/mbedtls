@@ -6,7 +6,7 @@ CFLAGS	?= -O2
 WARNING_CFLAGS ?= -Wall -W -Wdeclaration-after-statement -Wno-unused-function -Wno-unused-value
 LDFLAGS ?=
 
-LOCAL_CFLAGS = $(WARNING_CFLAGS) -I../include -D_FILE_OFFSET_BITS=64
+LOCAL_CFLAGS = $(WARNING_CFLAGS) -I../include -I../tests/suites -D_FILE_OFFSET_BITS=64
 LOCAL_LDFLAGS = -L../library 			\
 		-lmbedtls$(SHARED_SUFFIX)	\
 		-lmbedx509$(SHARED_SUFFIX)	\
@@ -77,12 +77,13 @@ APPS =	test_suite_aes.ecb$(EXEXT)	test_suite_aes.cbc$(EXEXT)	\
 	test_suite_md$(EXEXT)		test_suite_mdx$(EXEXT)		\
 	test_suite_memory_buffer_alloc$(EXEXT)				\
 	test_suite_mpi$(EXEXT)						\
-	test_suite_pem$(EXEXT)			test_suite_pkcs1_v15$(EXEXT)	\
+	test_suite_pem$(EXEXT)		test_suite_pkcs1_v15$(EXEXT)	\
 	test_suite_pkcs1_v21$(EXEXT)	test_suite_pkcs5$(EXEXT)	\
 	test_suite_pkparse$(EXEXT)	test_suite_pkwrite$(EXEXT)	\
 	test_suite_pk$(EXEXT)						\
 	test_suite_rsa$(EXEXT)		test_suite_shax$(EXEXT)		\
-	test_suite_ssl$(EXEXT)		test_suite_timing$(EXEXT)			\
+	test_suite_ssl$(EXEXT)						\
+	test_suite_threading$(EXEXT)	test_suite_timing$(EXEXT)	\
 	test_suite_x509parse$(EXEXT)	test_suite_x509write$(EXEXT)	\
 	test_suite_xtea$(EXEXT)		test_suite_version$(EXEXT)
 
@@ -410,6 +411,10 @@ test_suite_shax$(EXEXT): test_suite_shax.c $(DEP)
 	$(CC) $(LOCAL_CFLAGS) $(CFLAGS) $<	$(LOCAL_LDFLAGS) $(LDFLAGS) -o $@
 
 test_suite_ssl$(EXEXT): test_suite_ssl.c $(DEP)
+	echo "  CC    $<"
+	$(CC) $(LOCAL_CFLAGS) $(CFLAGS) $<	$(LOCAL_LDFLAGS) $(LDFLAGS) -o $@
+
+test_suite_threading$(EXEXT): test_suite_threading.c $(DEP)
 	echo "  CC    $<"
 	$(CC) $(LOCAL_CFLAGS) $(CFLAGS) $<	$(LOCAL_LDFLAGS) $(LDFLAGS) -o $@
 

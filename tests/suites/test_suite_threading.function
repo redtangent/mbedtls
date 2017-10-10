@@ -1,0 +1,129 @@
+/* BEGIN_HEADER */
+#include "mbedtls/threading.h"
+
+#if defined(MBEDTLS_THREADING_PTHREAD)
+#include <pthread.h>
+#endif
+
+#if defined(MBEDTLS_THREADING_ALT)
+void alt_mutex_init( mbedtls_threading_mutex_t *mutex )
+{
+    mutex->is_initialised = 1;
+}
+
+void alt_mutex_free( mbedtls_threading_mutex_t *mutex )
+{
+    if( mutex == NULL || !mutex->is_initialised )
+        return;
+
+    mutex->is_initialised = 0;
+}
+
+int alt_mutex_lock( mbedtls_threading_mutex_t *mutex )
+{
+    if( mutex == NULL || !mutex->is_initialised )
+        return( MBEDTLS_ERR_THREADING_BAD_INPUT_DATA );
+
+    mutex->is_locked = 1;
+
+    return( 0 );
+}
+
+int alt_mutex_unlock( mbedtls_threading_mutex_t *mutex )
+{
+    if( mutex == NULL || !mutex->is_initialised )
+        return( MBEDTLS_ERR_THREADING_BAD_INPUT_DATA );
+
+    mutex->is_locked = 0;
+
+    return( 0 );
+}
+#endif /* MBEDTLS_THREADING_ALT */
+
+/* END_HEADER */
+
+/* BEGIN_DEPENDENCIES
+ * depends_on:MBEDTLS_THREADING_C
+ * END_DEPENDENCIES
+ */
+
+/* BEGIN_CASE */
+void lock_mutex()
+{
+    mbedtls_threading_mutex_t test_mutex = MBEDTLS_MUTEX_INITIALIZER;
+
+#if defined(MBEDTLS_THREADING_ALT)
+    mbedtls_threading_set_alt( &alt_mutex_init,
+                                &alt_mutex_free,
+                                &alt_mutex_lock,
+                                &alt_mutex_unlock );
+#endif
+
+    mbedtls_mutex_init( &test_mutex);
+
+    TEST_ASSERT( mbedtls_mutex_lock( &test_mutex ) == 0 );
+    TEST_ASSERT( mbedtls_mutex_unlock( &test_mutex ) == 0 );
+exit:
+    mbedtls_mutex_free( &test_mutex );
+}
+/* END_CASE */
+
+/* BEGIN_CASE depends_on:MBEDTLS_THREADING_ALT */
+void set_alt_mutex()
+{
+    mbedtls_threading_mutex_t test_mutex = { 0,0 };
+
+    mbedtls_threading_set_alt( &alt_mutex_init,
+                                &alt_mutex_free,
+                                &alt_mutex_lock,
+                                &alt_mutex_unlock );
+
+    /* Verify initial state */
+    TEST_ASSERT( (test_mutex.is_initialised == 0) &&
+                     (test_mutex.is_locked == 0) );
+
+    /* Initialise the mutex */
+    mbedtls_mutex_init( &test_mutex );
+    TEST_ASSERT( (test_mutex.is_initialised == 1) &&
+                     (test_mutex.is_locked == 0) );
+
+    /* Lock the mutex */
+    mbedtls_mutex_init( &test_mutex );
+    TEST_ASSERT( mbedtls_mutex_lock( &test_mutex ) == 0 );
+    TEST_ASSERT( (test_mutex.is_initialised == 1) &&
+                     (test_mutex.is_locked == 1) );
+
+    /* Unlock the mutex */
+    mbedtls_mutex_init( &test_mutex );
+    TEST_ASSERT( mbedtls_mutex_unlock( &test_mutex ) == 0 );
+    TEST_ASSERT( (test_mutex.is_initialised == 1) &&
+                     (test_mutex.is_locked == 0) );
+
+    /* Free the mutex */
+    mbedtls_mutex_init( &test_mutex );
+    mbedtls_mutex_free( &test_mutex);
+    TEST_ASSERT( (test_mutex.is_initialised == 0) &&
+                     (test_mutex.is_locked == 0) );
+
+}
+/* END_CASE */
+
+/* BEGIN_CASE */
+void uninitialised_pthread_mutex()
+{
+    mbedtls_threading_mutex_t test_mutex;
+
+    memset( &test_mutex, 0L, sizeof(test_mutex) );
+
+    /* Call every mutex operation with an uninitialised mutex */
+    mbedtls_mutex_init( NULL );
+
+    TEST_ASSERT( mbedtls_mutex_lock( &test_mutex) == MBEDTLS_ERR_THREADING_BAD_INPUT_DATA );
+
+    TEST_ASSERT( mbedtls_mutex_unlock( &test_mutex) == MBEDTLS_ERR_THREADING_BAD_INPUT_DATA );
+
+    mbedtls_mutex_free( &test_mutex);
+
+}
+/* END_CASE */
+

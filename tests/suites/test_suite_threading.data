@@ -1,0 +1,9 @@
+Uninitialised mutex
+uninitialised_pthread_mutex:
+
+Initialise, lock, unlock mutex
+lock_mutex:
+
+Initialise, lock and unlock _ALT mutex
+set_alt_mutex:
+

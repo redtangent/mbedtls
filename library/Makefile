@@ -12,6 +12,10 @@ ifdef DEBUG
 LOCAL_CFLAGS += -g3
 endif
 
+ifdef TEST
+LOCAL_CFLAGS += -I../tests/suites
+endif
+
 # MicroBlaze specific options:
 # CFLAGS += -mno-xl-soft-mul -mxl-barrel-shift
 
